@@ -144,3 +144,41 @@ func TestRequestID(t *testing.T) {
 		})
 	}
 }
+
+func benchmarkRequestID(b *testing.B, cfg Config) {
+	router := newTestRouter(cfg, cfg.Header)
+	w := httptest.NewRecorder()
+	for i := 0; i < b.N; i++ {
+		req, _ := http.NewRequest("GET", "/", bytes.NewReader([]byte{}))
+		router.ServeHTTP(w, req)
+		w.Flush()
+	}
+}
+
+func BenchmarkRequestIDWithGinCtx(b *testing.B) {
+	cfg := DefaultCfg()
+	cfg.SetReqHeader = false
+	cfg.SetGinCtx = true
+	benchmarkRequestID(b, cfg)
+}
+
+func BenchmarkRequestIDWithReqHeader(b *testing.B) {
+	cfg := DefaultCfg()
+	cfg.SetReqHeader = true
+	cfg.SetGinCtx = false
+	benchmarkRequestID(b, cfg)
+}
+
+func BenchmarkRequestIDWithBothOutPuts(b *testing.B) {
+	cfg := DefaultCfg()
+	cfg.SetReqHeader = true
+	cfg.SetGinCtx = true
+	benchmarkRequestID(b, cfg)
+}
+
+func BenchmarkRequestIDBothDisabled(b *testing.B) {
+	cfg := DefaultCfg()
+	cfg.SetReqHeader = false
+	cfg.SetGinCtx = false
+	benchmarkRequestID(b, cfg)
+}

@@ -33,6 +33,10 @@ func DefaultCfg() Config {
 //If the cfg Config values are empty, the DefaultCfg config values will be applied.
 func RequestID(cfg Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		//early exit
+		if !cfg.SetReqHeader && !cfg.SetGinCtx {
+			return
+		}
 		//check for existing request header
 		xRequestID := c.Request.Header.Get(cfg.Header)
 		if xRequestID == "" {
